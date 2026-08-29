@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check } from 'lucide-react';
 import { useCart, cartTotal, fmt, type CartItem } from '../store/useCart';
-import { WHATSAPP_PHONE, PIKI_URL } from '../config';
+import { WHATSAPP_PHONE } from '../config';
+import { openPiki } from '../lib/piki';
 
 function buildOrderLines(items: CartItem[]) {
   return items.map((item) => {
@@ -63,10 +64,10 @@ export function CartDrawer() {
 
   async function handlePikiCheckout() {
     // Piki has no public cart API, so we hand the shopper their order text
-    // and drop them straight into the Piki storefront to place it.
+    // and open the Piki app for them to place it.
     const copied = await copyToClipboard(buildPikiMessage(items));
     setPikiCopied(copied);
-    window.open(PIKI_URL, '_blank', 'noopener,noreferrer');
+    openPiki();
   }
 
   if (!isOpen) return null;
@@ -153,12 +154,12 @@ export function CartDrawer() {
               className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-pink-600 to-purple-700 hover:from-pink-700 hover:to-purple-800 text-white font-display font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg active:scale-95"
             >
               <Bike className="h-5 w-5" />
-              Send Order to Piki
+              Order on the Piki App
             </button>
             {pikiCopied && (
               <p className="flex items-center justify-center gap-1.5 text-green-600 text-xs font-medium">
                 <Check className="h-3.5 w-3.5" />
-                Order copied — paste it in Piki’s order notes
+                Order copied — paste it into Piki’s order notes
               </p>
             )}
             <button
