@@ -1,25 +1,72 @@
-import { X, Plus, Minus, Trash2, MessageCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check } from 'lucide-react';
 import { useCart, cartTotal, fmt, type CartItem } from '../store/useCart';
+import { WHATSAPP_PHONE, PIKI_URL } from '../config';
 
-const PHONE = '255687886869';
-
-function buildWhatsAppMessage(items: CartItem[]) {
-  const lines = items.map((item) => {
+function buildOrderLines(items: CartItem[]) {
+  return items.map((item) => {
     const toppings = item.toppings.length > 0 ? `\n   + ${item.toppings.join(', ')}` : '';
     return `• ${item.qty}x ${item.name} (${item.size}) — ${fmt(item.price * item.qty)}${toppings}`;
   });
+}
+
+function buildWhatsAppMessage(items: CartItem[]) {
   const total = cartTotal(items);
-  return `🧋 *Order from Cafe Boba Website*\n\n${lines.join('\n')}\n\n*Total: ${fmt(total)}*\n\nPlease confirm my order. Thank you!`;
+  return `🧋 *Order from Cafe Boba Website*\n\n${buildOrderLines(items).join('\n')}\n\n*Total: ${fmt(total)}*\n\nPlease confirm my order. Thank you!`;
+}
+
+function buildPikiMessage(items: CartItem[]) {
+  const total = cartTotal(items);
+  return `Cafe Boba order\n\n${buildOrderLines(items).join('\n')}\n\nTotal: ${fmt(total)}`;
+}
+
+async function copyToClipboard(text: string) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // fall through to the textarea fallback below
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
 }
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, updateQty, removeItem, clear } = useCart();
   const total = cartTotal(items);
+  const [pikiCopied, setPikiCopied] = useState(false);
+
+  useEffect(() => {
+    if (!pikiCopied) return;
+    const t = setTimeout(() => setPikiCopied(false), 4000);
+    return () => clearTimeout(t);
+  }, [pikiCopied]);
 
   function handleCheckout() {
     const msg = buildWhatsAppMessage(items);
-    const url = `https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
+  }
+
+  async function handlePikiCheckout() {
+    // Piki has no public cart API, so we hand the shopper their order text
+    // and drop them straight into the Piki storefront to place it.
+    const copied = await copyToClipboard(buildPikiMessage(items));
+    setPikiCopied(copied);
+    window.open(PIKI_URL, '_blank', 'noopener,noreferrer');
   }
 
   if (!isOpen) return null;
@@ -101,6 +148,19 @@ export function CartDrawer() {
               <MessageCircle className="h-5 w-5" />
               Send Order on WhatsApp
             </button>
+            <button
+              onClick={handlePikiCheckout}
+              className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-pink-600 to-purple-700 hover:from-pink-700 hover:to-purple-800 text-white font-display font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg active:scale-95"
+            >
+              <Bike className="h-5 w-5" />
+              Send Order to Piki
+            </button>
+            {pikiCopied && (
+              <p className="flex items-center justify-center gap-1.5 text-green-600 text-xs font-medium">
+                <Check className="h-3.5 w-3.5" />
+                Order copied — paste it in Piki’s order notes
+              </p>
+            )}
             <button
               onClick={clear}
               className="w-full text-center text-gray-400 text-sm hover:text-red-400 transition-colors py-1"
