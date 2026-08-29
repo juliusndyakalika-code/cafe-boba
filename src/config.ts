@@ -21,10 +21,18 @@ export const PIKI_APP_STORE_URL = `https://apps.apple.com/tz/app/id${PIKI_IOS_AP
 export const PIKI_URL = 'https://www.piki.co.tz';
 
 /**
- * Optional custom URL scheme for the Piki app, e.g. 'piki'.
- * Piki has not published one and their domain is currently down, so this is
- * left empty on purpose: an unregistered scheme makes iOS Safari throw a
- * "Cannot Open Page" alert. Fill it in only if Piki confirms the scheme —
- * openPiki() will then try it first on iOS before falling back to the store.
+ * Custom URL scheme for the Piki app, e.g. 'piki'.
+ *
+ * This is the ONE value that makes "open the app directly" work, on both
+ * Android and iOS. It is empty because Piki has not published a scheme:
+ * piki.co.tz returns 500, has no apple-app-site-association, and has no
+ * archived snapshots, so it could not be discovered — and a wrong guess is
+ * worse than none (Android silently bounces to the Play Store, iOS Safari
+ * throws a "Cannot Open Page" alert).
+ *
+ * To find it: open the Piki app, share any restaurant, and look at the link.
+ * If it starts with something like "piki://", put that word here. If it is an
+ * https:// link on a Piki domain, it's an App Link — put the full URL in
+ * PIKI_URL instead and the OS will route it to the app.
  */
 export const PIKI_APP_SCHEME = '';

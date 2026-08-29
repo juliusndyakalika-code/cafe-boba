@@ -20,15 +20,19 @@ function detectPlatform(): Platform {
 
 /**
  * Android intent URL that launches the installed Piki app straight from the
- * browser. If Piki isn't installed, Chrome follows browser_fallback_url to the
- * Play Store listing instead of dead-ending.
+ * browser, falling back to the Play Store listing when it isn't installed.
+ *
+ * This requires PIKI_APP_SCHEME. Chrome forces CATEGORY_BROWSABLE onto every
+ * intent:// it handles and only matches activities that declare it — deep-link
+ * activities do, launcher activities do not. So an intent built from
+ * action=MAIN/category=LAUNCHER can never resolve from a browser; it silently
+ * falls through to the Play Store. Only a real scheme works here.
  */
 function androidIntentUrl() {
   return [
-    'intent://#Intent',
+    `intent://open#Intent`,
+    `scheme=${PIKI_APP_SCHEME}`,
     `package=${PIKI_ANDROID_PACKAGE}`,
-    'action=android.intent.action.MAIN',
-    'category=android.intent.category.LAUNCHER',
     `S.browser_fallback_url=${encodeURIComponent(PIKI_PLAY_STORE_URL)}`,
     'end',
   ].join(';');
@@ -55,7 +59,10 @@ export function openPiki() {
   const platform = detectPlatform();
 
   if (platform === 'android') {
-    window.location.href = androidIntentUrl();
+    // Without a real scheme there is no way to reach the app from a browser,
+    // so go straight to the Play Store listing — it shows "Open" when Piki is
+    // already installed.
+    window.location.href = PIKI_APP_SCHEME ? androidIntentUrl() : PIKI_PLAY_STORE_URL;
     return;
   }
 
