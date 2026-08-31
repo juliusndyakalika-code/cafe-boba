@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check } from 'lucide-react';
+import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check, Store, Car } from 'lucide-react';
 import { useCart, cartTotal, fmt, type CartItem } from '../store/useCart';
 import { WHATSAPP_PHONE, DUKA_STORE_URL } from '../config';
 
@@ -10,9 +10,16 @@ function buildOrderLines(items: CartItem[]) {
   });
 }
 
-function buildWhatsAppMessage(items: CartItem[]) {
+type Fulfilment = 'pickup' | 'bolt';
+
+const FULFILMENT_LINE: Record<Fulfilment, string> = {
+  pickup: '🏪 *Pickup* — I’ll collect it at Slipway.',
+  bolt: '🚗 *Delivery by Bolt* — I’ll share my location, please send it with a Bolt driver.',
+};
+
+function buildWhatsAppMessage(items: CartItem[], fulfilment: Fulfilment) {
   const total = cartTotal(items);
-  return `🧋 *Order from Cafe Boba Website*\n\n${buildOrderLines(items).join('\n')}\n\n*Total: ${fmt(total)}*\n\nPlease confirm my order. Thank you!`;
+  return `🧋 *Order from Cafe Boba Website*\n\n${buildOrderLines(items).join('\n')}\n\n*Total: ${fmt(total)}*\n\n${FULFILMENT_LINE[fulfilment]}\n\nPlease confirm my order. Thank you!`;
 }
 
 /**
@@ -56,6 +63,7 @@ export function CartDrawer() {
   const { items, isOpen, closeCart, updateQty, removeItem, clear } = useCart();
   const total = cartTotal(items);
   const [copiedQuery, setCopiedQuery] = useState<string | null>(null);
+  const [fulfilment, setFulfilment] = useState<Fulfilment>('pickup');
 
   useEffect(() => {
     if (!copiedQuery) return;
@@ -64,7 +72,7 @@ export function CartDrawer() {
   }, [copiedQuery]);
 
   function handleCheckout() {
-    const msg = buildWhatsAppMessage(items);
+    const msg = buildWhatsAppMessage(items, fulfilment);
     const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   }
@@ -150,6 +158,34 @@ export function CartDrawer() {
               <span className="font-display font-black text-2xl bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                 {fmt(total)}
               </span>
+            </div>
+            <div>
+              <p className="text-gray-500 text-xs font-medium mb-1.5">How would you like it?</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { key: 'pickup' as const, icon: Store, label: 'Pick up', hint: 'At Slipway' },
+                  { key: 'bolt' as const, icon: Car, label: 'Bolt delivery', hint: 'To your place' },
+                ]).map(({ key, icon: Icon, label, hint }) => {
+                  const active = fulfilment === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setFulfilment(key)}
+                      className={`flex flex-col items-center gap-0.5 py-2.5 rounded-2xl border-2 transition-all ${
+                        active
+                          ? 'border-pink-500 bg-pink-50 text-pink-700'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="font-display font-bold text-xs">{label}</span>
+                      <span className="text-[10px] opacity-70">{hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <button
               onClick={handleCheckout}
