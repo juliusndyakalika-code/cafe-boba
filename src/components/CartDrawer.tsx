@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check } from 'lucide-react';
 import { useCart, cartTotal, fmt, type CartItem } from '../store/useCart';
-import { WHATSAPP_PHONE } from '../config';
-import { DUKA_STORE_URL } from '../config';
+import { WHATSAPP_PHONE, DUKA_STORE_URL } from '../config';
 
 function buildOrderLines(items: CartItem[]) {
   return items.map((item) => {
@@ -16,9 +15,17 @@ function buildWhatsAppMessage(items: CartItem[]) {
   return `🧋 *Order from Cafe Boba Website*\n\n${buildOrderLines(items).join('\n')}\n\n*Total: ${fmt(total)}*\n\nPlease confirm my order. Thank you!`;
 }
 
-function buildDukaMessage(items: CartItem[]) {
-  const total = cartTotal(items);
-  return `Cafe Boba order\n\n${buildOrderLines(items).join('\n')}\n\nTotal: ${fmt(total)}`;
+/**
+ * What we put on the clipboard for duka.direct: a single drink name, ready to
+ * paste into the app's search bar.
+ *
+ * Deliberately not the full order — duka.direct's search takes one product at
+ * a time, so a multi-line list with quantities and prices matches nothing.
+ * Multi-item carts copy the first drink; the confirmation names the rest so
+ * the shopper can search them in turn.
+ */
+function buildDukaSearchQuery(items: CartItem[]) {
+  return items[0]?.name ?? '';
 }
 
 async function copyToClipboard(text: string) {
@@ -48,13 +55,13 @@ async function copyToClipboard(text: string) {
 export function CartDrawer() {
   const { items, isOpen, closeCart, updateQty, removeItem, clear } = useCart();
   const total = cartTotal(items);
-  const [dukaCopied, setDukaCopied] = useState(false);
+  const [copiedQuery, setCopiedQuery] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!dukaCopied) return;
-    const t = setTimeout(() => setDukaCopied(false), 4000);
+    if (!copiedQuery) return;
+    const t = setTimeout(() => setCopiedQuery(null), 6000);
     return () => clearTimeout(t);
-  }, [dukaCopied]);
+  }, [copiedQuery]);
 
   function handleCheckout() {
     const msg = buildWhatsAppMessage(items);
@@ -63,11 +70,13 @@ export function CartDrawer() {
   }
 
   function handleDukaCheckout() {
-    // duka.direct has no public cart API, so we hand the shopper their order
-    // text to paste once the app opens. Deliberately not awaited and the
-    // anchor's default navigation is left alone: iOS only fires Universal
-    // Links for a real link activation, not for JS-driven navigation.
-    void copyToClipboard(buildDukaMessage(items)).then(setDukaCopied);
+    // duka.direct has no public cart API and we cannot type into their app, so
+    // the most we can do is leave the search term on the clipboard for the
+    // shopper to paste. Deliberately not awaited and the anchor's default
+    // navigation is left alone: iOS only fires Universal Links for a real link
+    // activation, not for JS-driven navigation.
+    const query = buildDukaSearchQuery(items);
+    void copyToClipboard(query).then((ok) => setCopiedQuery(ok ? query : null));
   }
 
   if (!isOpen) return null;
@@ -159,11 +168,19 @@ export function CartDrawer() {
               <Bike className="h-5 w-5" />
               Order on duka.direct
             </a>
-            {dukaCopied && (
-              <p className="flex items-center justify-center gap-1.5 text-green-600 text-xs font-medium">
-                <Check className="h-3.5 w-3.5" />
-                Order copied — paste it into duka.direct’s order notes
-              </p>
+            {copiedQuery && (
+              <div className="text-center space-y-0.5">
+                <p className="flex items-center justify-center gap-1.5 text-green-600 text-xs font-medium">
+                  <Check className="h-3.5 w-3.5" />
+                  Copied “{copiedQuery}” — paste it into duka.direct’s search
+                </p>
+                {items.length > 1 && (
+                  <p className="text-gray-400 text-xs">
+                    Then search your other {items.length - 1} item
+                    {items.length > 2 ? 's' : ''}: {items.slice(1).map((i) => i.name).join(', ')}
+                  </p>
+                )}
+              </div>
             )}
             <button
               onClick={clear}
