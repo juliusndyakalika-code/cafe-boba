@@ -1,5 +1,5 @@
 import { Phone, MapPin, Clock } from 'lucide-react';
-import { openDuka, dukaHref } from '../lib/dukaDirect';
+import { DUKA_STORE_URL } from '../config';
 
 export function Contact() {
   return (
@@ -94,11 +94,7 @@ export function Contact() {
           <h3 className="font-display font-black text-2xl mb-2">Now on duka.direct!</h3>
           <p className="text-white/80 mb-5">Order your favourite bubble teas and sweet treats — delivered right to you.</p>
           <a
-            href={dukaHref()}
-            onClick={(e) => {
-              e.preventDefault();
-              openDuka();
-            }}
+            href={DUKA_STORE_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-white text-purple-700 font-display font-bold px-8 py-3 rounded-full hover:shadow-lg hover:scale-105 transition-all"

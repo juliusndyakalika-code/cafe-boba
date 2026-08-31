@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { useCart } from '../store/useCart';
-import { openDuka, dukaHref } from '../lib/dukaDirect';
+import { DUKA_STORE_URL } from '../config';
 
 const LINKS = [
   { label: 'Home', href: '#home' },
@@ -87,11 +87,7 @@ export function Navbar() {
               </a>
             ))}
             <a
-              href={dukaHref()}
-              onClick={(e) => {
-                e.preventDefault();
-                openDuka();
-              }}
+              href={DUKA_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 text-center bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold px-4 py-2.5 rounded-full"

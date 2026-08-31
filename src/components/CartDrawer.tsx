@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check } from 'lucide-react';
 import { useCart, cartTotal, fmt, type CartItem } from '../store/useCart';
 import { WHATSAPP_PHONE } from '../config';
-import { openDuka } from '../lib/dukaDirect';
+import { DUKA_STORE_URL } from '../config';
 
 function buildOrderLines(items: CartItem[]) {
   return items.map((item) => {
@@ -62,12 +62,12 @@ export function CartDrawer() {
     window.open(url, '_blank');
   }
 
-  async function handleDukaCheckout() {
+  function handleDukaCheckout() {
     // duka.direct has no public cart API, so we hand the shopper their order
-    // text and open duka.direct for them to place it.
-    const copied = await copyToClipboard(buildDukaMessage(items));
-    setDukaCopied(copied);
-    openDuka();
+    // text to paste once the app opens. Deliberately not awaited and the
+    // anchor's default navigation is left alone: iOS only fires Universal
+    // Links for a real link activation, not for JS-driven navigation.
+    void copyToClipboard(buildDukaMessage(items)).then(setDukaCopied);
   }
 
   if (!isOpen) return null;
@@ -149,13 +149,16 @@ export function CartDrawer() {
               <MessageCircle className="h-5 w-5" />
               Send Order on WhatsApp
             </button>
-            <button
+            <a
+              href={DUKA_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={handleDukaCheckout}
               className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-pink-600 to-purple-700 hover:from-pink-700 hover:to-purple-800 text-white font-display font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg active:scale-95"
             >
               <Bike className="h-5 w-5" />
               Order on duka.direct
-            </button>
+            </a>
             {dukaCopied && (
               <p className="flex items-center justify-center gap-1.5 text-green-600 text-xs font-medium">
                 <Check className="h-3.5 w-3.5" />
