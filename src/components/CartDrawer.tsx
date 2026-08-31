@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check } from 'lucide-react';
 import { useCart, cartTotal, fmt, type CartItem } from '../store/useCart';
 import { WHATSAPP_PHONE } from '../config';
-import { openPiki } from '../lib/piki';
+import { openDuka } from '../lib/dukaDirect';
 
 function buildOrderLines(items: CartItem[]) {
   return items.map((item) => {
@@ -16,7 +16,7 @@ function buildWhatsAppMessage(items: CartItem[]) {
   return `🧋 *Order from Cafe Boba Website*\n\n${buildOrderLines(items).join('\n')}\n\n*Total: ${fmt(total)}*\n\nPlease confirm my order. Thank you!`;
 }
 
-function buildPikiMessage(items: CartItem[]) {
+function buildDukaMessage(items: CartItem[]) {
   const total = cartTotal(items);
   return `Cafe Boba order\n\n${buildOrderLines(items).join('\n')}\n\nTotal: ${fmt(total)}`;
 }
@@ -48,13 +48,13 @@ async function copyToClipboard(text: string) {
 export function CartDrawer() {
   const { items, isOpen, closeCart, updateQty, removeItem, clear } = useCart();
   const total = cartTotal(items);
-  const [pikiCopied, setPikiCopied] = useState(false);
+  const [dukaCopied, setDukaCopied] = useState(false);
 
   useEffect(() => {
-    if (!pikiCopied) return;
-    const t = setTimeout(() => setPikiCopied(false), 4000);
+    if (!dukaCopied) return;
+    const t = setTimeout(() => setDukaCopied(false), 4000);
     return () => clearTimeout(t);
-  }, [pikiCopied]);
+  }, [dukaCopied]);
 
   function handleCheckout() {
     const msg = buildWhatsAppMessage(items);
@@ -62,12 +62,12 @@ export function CartDrawer() {
     window.open(url, '_blank');
   }
 
-  async function handlePikiCheckout() {
-    // Piki has no public cart API, so we hand the shopper their order text
-    // and open the Piki app for them to place it.
-    const copied = await copyToClipboard(buildPikiMessage(items));
-    setPikiCopied(copied);
-    openPiki();
+  async function handleDukaCheckout() {
+    // duka.direct has no public cart API, so we hand the shopper their order
+    // text and open duka.direct for them to place it.
+    const copied = await copyToClipboard(buildDukaMessage(items));
+    setDukaCopied(copied);
+    openDuka();
   }
 
   if (!isOpen) return null;
@@ -150,16 +150,16 @@ export function CartDrawer() {
               Send Order on WhatsApp
             </button>
             <button
-              onClick={handlePikiCheckout}
+              onClick={handleDukaCheckout}
               className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-pink-600 to-purple-700 hover:from-pink-700 hover:to-purple-800 text-white font-display font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg active:scale-95"
             >
               <Bike className="h-5 w-5" />
-              Order on the Piki App
+              Order on duka.direct
             </button>
-            {pikiCopied && (
+            {dukaCopied && (
               <p className="flex items-center justify-center gap-1.5 text-green-600 text-xs font-medium">
                 <Check className="h-3.5 w-3.5" />
-                Order copied — paste it into Piki’s order notes
+                Order copied — paste it into duka.direct’s order notes
               </p>
             )}
             <button

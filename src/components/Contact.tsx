@@ -1,5 +1,5 @@
 import { Phone, MapPin, Clock } from 'lucide-react';
-import { openPiki, pikiHref } from '../lib/piki';
+import { openDuka, dukaHref } from '../lib/dukaDirect';
 
 export function Contact() {
   return (
@@ -88,22 +88,22 @@ export function Contact() {
           </div>
         </div>
 
-        {/* Piki CTA */}
+        {/* duka.direct CTA */}
         <div className="mt-12 bg-gradient-to-r from-pink-600 to-purple-700 rounded-3xl p-8 text-center">
           <div className="text-3xl mb-3">🛵</div>
-          <h3 className="font-display font-black text-2xl mb-2">Now on Piki!</h3>
+          <h3 className="font-display font-black text-2xl mb-2">Now on duka.direct!</h3>
           <p className="text-white/80 mb-5">Order your favourite bubble teas and sweet treats — delivered right to you.</p>
           <a
-            href={pikiHref()}
+            href={dukaHref()}
             onClick={(e) => {
               e.preventDefault();
-              openPiki();
+              openDuka();
             }}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-white text-purple-700 font-display font-bold px-8 py-3 rounded-full hover:shadow-lg hover:scale-105 transition-all"
           >
-            Order on Piki
+            Order on duka.direct
           </a>
         </div>
 

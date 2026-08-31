@@ -2,7 +2,7 @@ const FEATURES = [
   { emoji: '🍓', title: 'Real Fruits Only', desc: 'No artificial syrups, colours, chemicals or preservatives. Every drink bursts with natural goodness.' },
   { emoji: '🧋', title: '60+ Drink Options', desc: 'Bubble teas, frappuccinos, milkshakes, fizzy floats, iced fruit teas and hot drinks.' },
   { emoji: '✨', title: 'Customizable', desc: 'Pick your size (S/M/L) and add any topping — crystal boba, jelly, cheese foam and more.' },
-  { emoji: '🛵', title: 'Piki Delivery', desc: 'Order from Cafe Boba on Piki and get your sweet treats delivered right to your door.' },
+  { emoji: '🛵', title: 'duka.direct Delivery', desc: 'Order from Cafe Boba on duka.direct and get your sweet treats delivered right to your door.' },
 ];
 
 export function About() {

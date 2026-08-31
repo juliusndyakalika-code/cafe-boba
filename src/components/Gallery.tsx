@@ -5,7 +5,7 @@ const PHOTOS = [
   { src: '/images/drink3.jpg', alt: 'Strawberry iced tea and chocolate boba' },
   { src: '/images/drink4.jpg', alt: 'Strawberry slush boba' },
   { src: '/images/drink5.jpg', alt: 'Mango passion slush' },
-  { src: '/images/drink6.jpg', alt: 'Cafe Boba on Piki' },
+  { src: '/images/drink6.jpg', alt: 'Cafe Boba on duka.direct' },
   { src: '/images/drink7.jpg', alt: 'Boba tea lamp scene' },
   { src: '/images/drink8.jpg', alt: 'Two drinks at table' },
 ];

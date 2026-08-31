@@ -58,7 +58,7 @@ export function Hero() {
           {[
             { num: '100%', label: 'Real Fruits' },
             { num: '8am', label: 'Opens Daily' },
-            { num: 'Piki', label: 'Delivery' },
+            { num: 'duka.direct', label: 'Delivery' },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <div className="font-display font-black text-2xl text-white">{s.num}</div>
