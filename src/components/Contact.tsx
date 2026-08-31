@@ -19,7 +19,7 @@ export function Contact() {
           {/* Info cards */}
           <div className="space-y-4">
             <a
-              href="tel:+255687886869"
+              href="tel:+255783134808"
               className="flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-5 transition-colors group"
             >
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shrink-0">
@@ -28,7 +28,7 @@ export function Contact() {
               <div>
                 <div className="text-xs text-gray-400 mb-0.5">Call us</div>
                 <div className="font-display font-bold text-white group-hover:text-pink-300 transition-colors">
-                  +255 687 886 869
+                  +255 783 134 808
                 </div>
               </div>
             </a>

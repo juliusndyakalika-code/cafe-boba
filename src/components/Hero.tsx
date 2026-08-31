@@ -47,7 +47,7 @@ export function Hero() {
             Explore the Menu
           </a>
           <a
-            href="tel:+255687886869"
+            href="tel:+255783134808"
             className="font-display font-bold bg-white/20 backdrop-blur-sm text-white border border-white/40 px-8 py-4 rounded-full text-lg hover:bg-white/30 transition-all"
           >
             Call Us Now

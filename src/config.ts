@@ -1,7 +1,7 @@
 // Central place for the shop's outbound ordering links.
 
 /** WhatsApp number in international format, no "+" and no spaces. */
-export const WHATSAPP_PHONE = '255687886869';
+export const WHATSAPP_PHONE = '255783134808';
 
 /**
  * Cafe Boba's storefront on duka.direct (merchant 63f754c7d6aecbd5aff7aa24),
