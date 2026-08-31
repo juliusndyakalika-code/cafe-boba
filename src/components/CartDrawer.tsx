@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check, Store, Car } from 'lucide-react';
+import { X, Plus, Minus, Trash2, MessageCircle, Bike, Check, Store, Car, MapPin } from 'lucide-react';
 import { useCart, cartTotal, fmt, type CartItem } from '../store/useCart';
 import { WHATSAPP_PHONE, DUKA_STORE_URL } from '../config';
 
@@ -12,14 +12,16 @@ function buildOrderLines(items: CartItem[]) {
 
 type Fulfilment = 'pickup' | 'bolt';
 
-const FULFILMENT_LINE: Record<Fulfilment, string> = {
-  pickup: '🏪 *Pickup* — I’ll collect it at Slipway.',
-  bolt: '🚗 *Delivery by Bolt* — I’ll share my location, please send it with a Bolt driver.',
-};
+function buildFulfilmentLine(fulfilment: Fulfilment, deliveryPoint: string) {
+  if (fulfilment === 'pickup') return '🏪 *Pickup* — I’ll collect it at Slipway.';
+  return `🚗 *Delivery by Bolt*\n📍 *Delivery point:* ${deliveryPoint.trim()}`;
+}
 
-function buildWhatsAppMessage(items: CartItem[], fulfilment: Fulfilment) {
+function buildWhatsAppMessage(items: CartItem[], fulfilment: Fulfilment, deliveryPoint: string) {
   const total = cartTotal(items);
-  return `🧋 *Order from Cafe Boba Website*\n\n${buildOrderLines(items).join('\n')}\n\n*Total: ${fmt(total)}*\n\n${FULFILMENT_LINE[fulfilment]}\n\nPlease confirm my order. Thank you!`;
+  const lines = buildOrderLines(items).join('\n');
+  const fulfil = buildFulfilmentLine(fulfilment, deliveryPoint);
+  return `🧋 *Order from Cafe Boba Website*\n\n${lines}\n\n*Total: ${fmt(total)}*\n\n${fulfil}\n\nPlease confirm my order. Thank you!`;
 }
 
 /**
@@ -64,6 +66,10 @@ export function CartDrawer() {
   const total = cartTotal(items);
   const [copiedQuery, setCopiedQuery] = useState<string | null>(null);
   const [fulfilment, setFulfilment] = useState<Fulfilment>('pickup');
+  const [deliveryPoint, setDeliveryPoint] = useState('');
+
+  // A Bolt order is useless to the shop without somewhere to send the driver.
+  const needsDeliveryPoint = fulfilment === 'bolt' && deliveryPoint.trim() === '';
 
   useEffect(() => {
     if (!copiedQuery) return;
@@ -72,7 +78,8 @@ export function CartDrawer() {
   }, [copiedQuery]);
 
   function handleCheckout() {
-    const msg = buildWhatsAppMessage(items, fulfilment);
+    if (needsDeliveryPoint) return;
+    const msg = buildWhatsAppMessage(items, fulfilment, deliveryPoint);
     const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   }
@@ -187,12 +194,32 @@ export function CartDrawer() {
                 })}
               </div>
             </div>
+            {fulfilment === 'bolt' && (
+              <div>
+                <label htmlFor="delivery-point" className="text-gray-500 text-xs font-medium flex items-center gap-1 mb-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Delivery point — exactly as it appears in Bolt
+                </label>
+                <input
+                  id="delivery-point"
+                  type="text"
+                  value={deliveryPoint}
+                  onChange={(e) => setDeliveryPoint(e.target.value)}
+                  placeholder="e.g. Mikocheni B, Regent Estate"
+                  className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:border-pink-500 focus:outline-none transition-colors"
+                />
+                <p className="text-gray-400 text-[11px] mt-1">
+                  Search the spot in the Bolt app and copy the name it shows, so the driver finds you.
+                </p>
+              </div>
+            )}
             <button
               onClick={handleCheckout}
-              className="w-full flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-display font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg active:scale-95"
+              disabled={needsDeliveryPoint}
+              className="w-full flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-display font-bold py-4 rounded-2xl text-lg transition-all hover:shadow-lg active:scale-95 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:active:scale-100"
             >
               <MessageCircle className="h-5 w-5" />
-              Send Order on WhatsApp
+              {needsDeliveryPoint ? 'Add your delivery point' : 'Send Order on WhatsApp'}
             </button>
             <a
               href={DUKA_STORE_URL}
